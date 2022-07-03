@@ -9,15 +9,17 @@ mod tests;
 /// 字符，还需要进一步“查看”字符串，即查看字符串中的下一个字符。readPosition
 /// 始终指向所输入字符串中的“下一个”字符，position 则指向所输入字符串中与 ch
 /// 字节对应的字符。
-struct Lexer {
+pub struct Lexer {
     chars: Vec<char>,
-    position: usize,      // 所输入字符串中的当前位置（指向当前字符）
-    read_position: usize, // 所输入字符串中的当前读取位置（指向当前字符之后的一个字符）
+    position: usize,
+    // 所输入字符串中的当前位置（指向当前字符）
+    read_position: usize,
+    // 所输入字符串中的当前读取位置（指向当前字符之后的一个字符）
     ch: char,             // 当前正在查看的字符
 }
 
 impl Lexer {
-    fn new(input: &str) -> Self {
+    pub fn new(input: &str) -> Self {
         let mut l = Lexer {
             chars: input.chars().collect(),
             position: 0,
@@ -31,16 +33,16 @@ impl Lexer {
     }
 
     fn read_char(&mut self) {
-        while let Some(ch) = self.chars.get(self.read_position) {
-            if ch.is_whitespace() {
-                self.read_position += 1;
-            } else {
-                self.ch = *ch;
-                self.position = self.read_position;
-                self.read_position += 1;
-                break;
-            }
-        }
+        // while let Some(ch) = self.chars.get(self.read_position) {
+        //     if ch.is_whitespace() {
+        //         self.read_position += 1;
+        //     } else {
+        //         self.ch = *ch;
+        //         self.position = self.read_position;
+        //         self.read_position += 1;
+        //         break;
+        //     }
+        // }
 
         if let Some(ch) = self.chars.get(self.read_position) {
             self.ch = *ch;
@@ -51,15 +53,41 @@ impl Lexer {
         }
     }
 
+    /// 这个函数不会前移 position 和 read_position。
+    /// 它的目的只是窥视一下输入中的下一个字符，不会移动位于输入中
+    /// 的指针位置，这样就能知道下一步在调用 readChar()时会返回什么。
+    fn peek_next_char(&self) -> char {
+        if let Some(ch) = self.chars.get(self.read_position) {
+            *ch
+        } else {
+            0 as char
+        }
+    }
+
     pub fn next_token(&mut self) -> Token {
+        self.skip_whitespace();
         let ch = self.ch;
         let (tok, need_read_char) = match ch {
+            '=' if self.peek_next_char() == '=' => {
+                self.read_char();
+                (Token::new(TokenType::EQ, "==".into()), true)
+            },
             '=' => (Token::from_char(TokenType::ASSIGN, ch), true),
+            '+' => (Token::from_char(TokenType::PLUS, ch), true),
+            '-' => (Token::from_char(TokenType::MINUS, ch), true),
+            '!' if self.peek_next_char() == '=' => {
+                self.read_char();
+                (Token::new(TokenType::NOTEQ, "!=".into()), true)
+            },
+            '!' => (Token::from_char(TokenType::BANG, ch), true),
+            '/' => (Token::from_char(TokenType::SLASH, ch), true),
+            '*' => (Token::from_char(TokenType::ASTERISK, ch), true),
+            '<' => (Token::from_char(TokenType::LT, ch), true),
+            '>' => (Token::from_char(TokenType::GT, ch), true),
             ';' => (Token::from_char(TokenType::SEMICOLON, ch), true),
+            ',' => (Token::from_char(TokenType::COMMA, ch), true),
             '(' => (Token::from_char(TokenType::LPAREN, ch), true),
             ')' => (Token::from_char(TokenType::RPAREN, ch), true),
-            ',' => (Token::from_char(TokenType::COMMA, ch), true),
-            '+' => (Token::from_char(TokenType::PLUS, ch), true),
             '{' => (Token::from_char(TokenType::LBRACE, ch), true),
             '}' => (Token::from_char(TokenType::RBRACE, ch), true),
             c if c.is_letter() => {
@@ -109,6 +137,12 @@ impl Lexer {
             .unwrap()
             .iter()
             .collect::<String>()
+    }
+
+    fn skip_whitespace(&mut self) {
+        while self.ch.is_whitespace() {
+            self.read_char();
+        }
     }
 }
 

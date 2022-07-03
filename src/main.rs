@@ -1,9 +1,17 @@
-mod token;
+#![allow(dead_code)]
+#![allow(unused_assignments)]
+
+use std::io;
+
 mod lexer;
+mod repl;
+mod token;
 
 fn main() {
-    let chars = "Hello, world!".chars().collect::<Vec<char>>();
-    let sl: String = chars.get(0..3).unwrap().iter().collect();
-    
-    dbg!(sl);
+    println!(
+        "Hello {}! This is the Monkey programming language!",
+        whoami::username()
+    );
+    println!("Feel free to type in commands");
+    repl::start(io::stdin(), io::stdout()).expect("Failed to execute repl");
 }

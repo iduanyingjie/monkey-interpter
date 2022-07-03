@@ -2,9 +2,9 @@ pub use self::token_type::TokenType;
 
 mod token_type;
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct Token {
-    r#type: TokenType,
+    pub(crate) r#type: TokenType,
     literal: String,
 }
 
