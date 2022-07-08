@@ -6,6 +6,8 @@ use std::io;
 mod lexer;
 mod repl;
 mod token;
+mod ast;
+mod parser;
 
 fn main() {
     println!(

@@ -4,8 +4,8 @@ mod token_type;
 
 #[derive(Debug, PartialEq)]
 pub struct Token {
-    pub(crate) r#type: TokenType,
-    literal: String,
+    pub r#type: TokenType,
+    pub literal: String,
 }
 
 impl Token {
@@ -14,6 +14,9 @@ impl Token {
     }
 
     pub fn from_char(r#type: TokenType, ch: char) -> Token {
-        Token { r#type, literal: ch.into() }
+        Token {
+            r#type,
+            literal: ch.into(),
+        }
     }
 }
